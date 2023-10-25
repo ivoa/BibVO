@@ -1,7 +1,7 @@
 \documentclass[11pt,a4paper]{ivoa}
 \input tthdefs
 
-\lstloadlanguages{sh}
+\lstloadlanguages{sh,SQL}
 \lstset{flexiblecolumns=true,basicstyle=\ttfamily,showstringspaces=False}
 
 \title{Bibliographic Interfaces in the Virtual Observatory}
@@ -94,7 +94,7 @@ bibliographic records with links to data sources (``D links'' in ADS
 nomenclature).  To retrieve pairs of ivoid and bibcode, the following
 RegTAP \citep{2019ivoa.spec.1011D} query can be used:
 
-\begin{lstlisting}
+\begin{lstlisting}[language=SQL]
 select ivoid, source_value, source_format
 from rr.resource
 where source_format in ('doi', 'bibcode')
@@ -111,6 +111,77 @@ Without VO tooling, a script like the following will yield this data in
 easily consumable CSV form:
 
 \lstinputlisting[language=sh]{harvest.sh}
+
+\section{Linking Datasets To Articles}
+
+The second scenario is that resources within a data centre are used or
+originate in some publication and the data centre operators want to
+notify bibliographic services of that fact.  Again, this might yield the
+equivalent of ADS ``D links''.  A prototype example here is an SSAP
+\citep{2012ivoa.spec.0210T} service that has a non-constant
+\textsl{meta.bib.bibcode} column.
+
+Bibliographic services \emph{could} try to harvest such information from
+the services themselves.  However, even where there is a standard
+location as in SSAP, the protocols usually not well suited for
+harvesting, and it would certainly be unattractive for bibliographic
+services to have to harvest dozens or hundreds of VO services with
+something like weekly cadence.
+
+\subsection{The biblink-harvest endpoint}
+
+Therefore, we propose a new endpoint; a data centre could have one or a
+few of these for all its data holdings.  This endpoint is a GET-able
+resource returning a application/json-encoded sequence of link records.
+Each link record MUST have the following keys:
+
+\begin{itemize}
+\item \emph{bib-ref} -- a machine-readable identifier of a bibliographic
+source; currently, either a bibcode or a DOI.
+\item \emph{relationship} -- a relationship identifier; see below.
+\item \emph{dataset-ref} -- a reference to the dataset or VO resource cited.
+This SHOULD be a URI understood by common web browsers; what is referenced
+does not need to be renderable by them (e.g., it could be a FITS file).
+\end{itemize}
+
+Optionally, a key \emph{bib-format} can be given.  If it is missing,
+harvesters may assume bibcodes.  Otherwise, it should contain one of the
+values defined for \verb|source/@format| in VOResource.
+
+All other keys are reserved except those beginning with an underscore
+character.  These can be used to prototype extensions or -- not
+encouraged -- to communicate extra metadata between specific data
+centres and specific bibliographic services.
+
+Since we expect responses from such endpoints to be always of manageable
+size –– a few megabytes at the worst --, we do not define a harvesting
+mode for this at this point.
+
+TODO: examples
+
+\subsection{Relationship Types}
+
+TODO
+
+\subsection{Discovering biblink-harvest endpoints}
+
+Data centres register their biblink-harvest endpoints as VODataService
+\citep{2021ivoa.spec.1102D} DataService-s.  These must have a capability
+with a \verb|standardID| of (for now; this will probably change if this
+endpoint will be specified in an IVOA REC)
+
+$$\nolinkurl{ivo://ivoa.net/std/BibVO#biblink-harvest-0.1}.$$
+
+To discover the endpoints of such services, bibliography services would
+execute a RegTAP query like
+
+\begin{lstlisting}[language=SQL]
+select ivoid, access_url
+from rr.capability
+  natural join rr.interface
+where standard_id like 'ivo://ivoa.net/std/BibVO#biblink-harvest-0.%'
+\end{lstlisting}
+
 
 \appendix
 \section{Changes from Previous Versions}
