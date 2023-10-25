@@ -1,0 +1,128 @@
+\documentclass[11pt,a4paper]{ivoa}
+\input tthdefs
+
+\lstloadlanguages{sh}
+\lstset{flexiblecolumns=true,basicstyle=\ttfamily,showstringspaces=False}
+
+\title{Bibliographic Interfaces in the Virtual Observatory}
+
+% see ivoatexDoc for what group names to use here; use \ivoagroup[IG] for
+% interest groups.
+\ivoagroup{Data Curation and Preservation}
+
+\author[http://www.ivoa.net/cgi-bin/twiki/bin/view/IVOA/MarkusDemleitner]{Demleitner, M.}
+\author{Accomazzi, A.}
+
+\editor{Demleitner, M.}
+
+% \previousversion[????URL????]{????Concise Document Label????}
+\previousversion{This is the first public release}
+
+
+\begin{document}
+\begin{abstract}
+This note documents existing approaches to interfacing the Virtual
+Observatory to bibliographic services, in particular the Astrophysics
+data Service ADS, and suggests amendments to these existing practices
+where necessary.
+\end{abstract}
+
+
+\section*{Conformance-related definitions}
+
+The words ``MUST'', ``SHALL'', ``SHOULD'', ``MAY'', ``RECOMMENDED'', and
+``OPTIONAL'' (in upper or lower case) used in this document are to be
+interpreted as described in IETF standard RFC2119 \citep{std:RFC2119}.
+
+The \emph{Virtual Observatory (VO)} is a
+general term for a collection of federated resources that can be used
+to conduct astronomical research, education, and outreach.
+The \href{https://www.ivoa.net}{International
+Virtual Observatory Alliance (IVOA)} is a global
+collaboration of separately funded projects to develop standards and
+infrastructure that enable VO applications.
+
+
+\section{Introduction}
+
+In addition to ``blind'' data discovery within the VO, users frequently
+want to know about VO resources in their relationship to the wider
+world, in particular that of scholarly publications.  Use cases we
+envision are, specifically,
+
+\begin{itemize}
+\item A user of a bibliographic service has discovered a publication of
+interest; they should also be directed to a VO resource that accompanies
+that publication.
+
+\item A user of a bibliographic service has discovered a publication
+that has used VO datasets; they should be notified of the public
+availability of these datasets.
+
+\item A user of a VO resource wants to properly give credit; we
+argue that resources published as a supplement to a scholarly
+publication need a different treatment here from resources not directly
+derived from one.
+\end{itemize}
+
+\section{Linking VO Resources to Articles}
+
+The VOResource metadata schema \citep{2018ivoa.spec.0625P} contains the
+content/source field, defined as
+
+\begin{quotation}
+\noindent A bibliographic reference from which the present resource is
+derived or extracted.
+
+\noindent This is intended to point to an article in the published
+literature. An ADS Bibcode is recommended as a value when available.
+\end{quotation}
+
+\noindent in VOResource 1.2.  VOResource 1.3 will presumably add DOIs as a
+recommended identifier type.
+
+It is generally understood that, absent other rules, users of a VO
+services should cite the referenced article when a resource has played a
+significant role in some published research.  Facilitating this citation
+is one major reason for having machine-readable identifiers in that
+field.  Care must be taken to properly declare the \verb|source/@format|
+to either \verb|bibcode| or \verb|doi|, or the queries below will miss
+useful metadata.
+
+Conversely, bibliographic services can use this information to enrich
+bibliographic records with links to data sources (``D links'' in ADS
+nomenclature).  To retrieve pairs of ivoid and bibcode, the following
+RegTAP \citep{2019ivoa.spec.1011D} query can be used:
+
+\begin{lstlisting}
+select ivoid, source_value, source_format
+from rr.resource
+where source_format in ('doi', 'bibcode')
+\end{lstlisting}
+
+This query will work on any modern searchable registry\footnote{A list
+of searchable VO registries can be obtained from the Registry of
+Registries at \url{https://rofr.ivoa.net}.}.  Note, however, that
+default match limits of the TAP services may already truncate this
+response, so TAP clients should take care to pass a suitable large
+MAXREC.
+
+Without VO tooling, a script like the following will yield this data in
+easily consumable CSV form:
+
+\lstinputlisting[language=sh]{harvest.sh}
+
+\appendix
+\section{Changes from Previous Versions}
+
+No previous versions yet.
+% these would be subsections "Changes from v. WD-..."
+% Use itemize environments.
+
+
+% NOTE: IVOA recommendations must be cited from docrepo rather than ivoabib
+% (REC entries there are for legacy documents only)
+\bibliography{ivoatex/ivoabib,ivoatex/docrepo}
+
+
+\end{document}
