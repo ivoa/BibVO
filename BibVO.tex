@@ -23,7 +23,7 @@
 \begin{abstract}
 This note documents existing approaches to interfacing the Virtual
 Observatory to bibliographic services, in particular the Astrophysics
-data Service ADS, and suggests amendments to these existing practices
+Data Service ADS, and suggests amendments to these existing practices
 where necessary.
 \end{abstract}
 
@@ -42,6 +42,8 @@ Virtual Observatory Alliance (IVOA)} is a global
 collaboration of separately funded projects to develop standards and
 infrastructure that enable VO applications.
 
+Items written \vorent{like this} in the following refer to items from
+the VOResource data model.
 
 \section{Introduction}
 
@@ -52,7 +54,7 @@ envision are, specifically,
 
 \begin{itemize}
 \item A user of a bibliographic service has discovered a publication of
-interest; they should also be directed to a VO resource that accompanies
+interest; they should also be directed to a VO resource that supplements
 that publication.
 
 \item A user of a bibliographic service has discovered a publication
@@ -68,7 +70,7 @@ derived from one.
 \section{Linking VO Resources to Articles}
 
 The VOResource metadata schema \citep{2018ivoa.spec.0625P} contains the
-content/source field, defined as
+\vorent{content/source} field, defined as
 
 \begin{quotation}
 \noindent A bibliographic reference from which the present resource is
@@ -81,13 +83,13 @@ literature. An ADS Bibcode is recommended as a value when available.
 \noindent in VOResource 1.2.  VOResource 1.3 will presumably add DOIs as a
 recommended identifier type.
 
-It is generally understood that, absent other rules, users of a VO
-services should cite the referenced article when a resource has played a
-significant role in some published research.  Facilitating this citation
-is one major reason for having machine-readable identifiers in that
-field.  Care must be taken to properly declare the \verb|source/@format|
-to either \verb|bibcode| or \verb|doi|, or the queries below will miss
-useful metadata.
+It is generally understood that, absent resource-specific regulations
+communicated in \vorent{rights}, users of a VO services should cite the
+referenced article when a resource has played a significant role in some
+published research.  Facilitating this citation is one major reason for
+having machine-readable identifiers in that field.  Care must be taken
+to properly declare the \vorent{source/@format} to either \verb|bibcode|
+or \verb|doi|. Otherwise, the query below will miss useful metadata.
 
 Conversely, bibliographic services can use this information to enrich
 bibliographic records with links to data sources (``D links'' in ADS
@@ -123,7 +125,7 @@ equivalent of ADS ``D links''.  A prototype example here is an SSAP
 
 Bibliographic services \emph{could} try to harvest such information from
 the services themselves.  However, even where there is a standard
-location as in SSAP, the protocols usually not well suited for
+location as in SSAP, the protocols are usually not well suited for
 harvesting, and it would certainly be unattractive for bibliographic
 services to have to harvest dozens or hundreds of VO services with
 something like weekly cadence.
@@ -145,8 +147,8 @@ does not need to be renderable by them (e.g., it could be a FITS file).
 \end{itemize}
 
 Optionally, a key \emph{bib-format} can be given.  If it is missing,
-harvesters may assume bibcodes.  Otherwise, it should contain one of the
-values defined for \verb|source/@format| in VOResource.
+harvesters may assume bibcodes in bib-ref.  Otherwise, it should contain
+one of the values defined for \vorent{source/@format} in VOResource.
 
 All other keys are reserved except those beginning with an underscore
 character.  These can be used to prototype extensions or -- not
@@ -154,8 +156,8 @@ encouraged -- to communicate extra metadata between specific data
 centres and specific bibliographic services.
 
 Since we expect responses from such endpoints to be always of manageable
-size –– a few megabytes at the worst --, we do not define a harvesting
-mode for this at this point.
+size –– a few megabytes --, we do not define a harvesting mode for this
+type of endpoint for now.
 
 TODO: examples
 
@@ -169,9 +171,7 @@ Data centres register their biblink-harvest endpoints as VODataService
 \citep{2021ivoa.spec.1102D} DataService-s.  These must have a capability
 with a \verb|standardID| of (for now; this will probably change if this
 endpoint will be specified in an IVOA REC)
-
-$$\nolinkurl{ivo://ivoa.net/std/BibVO#biblink-harvest-0.1}.$$
-
+$$\hbox{\nolinkurl{ivo://ivoa.net/std/BibVO#biblink-harvest-0.1}}.$$
 To discover the endpoints of such services, bibliography services would
 execute a RegTAP query like
 
@@ -179,9 +179,28 @@ execute a RegTAP query like
 select ivoid, access_url
 from rr.capability
   natural join rr.interface
-where standard_id like 'ivo://ivoa.net/std/BibVO#biblink-harvest-0.%'
+where
+  standard_id like 'ivo://ivoa.net/std/BibVO#biblink-harvest-0.%'
 \end{lstlisting}
 
+\section{VO Resources as Bibliographic Resources}
+
+While we believe that in the case of VO resources simply supplementing a
+published article, a separate bibliographical record is generally not
+very useful -- scientists can discover the \emph{data} in the VO
+Registry, and for credit it is still more useful if they cite the
+supplemented journal publication --, there are numerous VO resources
+that do not have an (adequate) citable article; these include resources
+publishing data from multiple independent journal publications,
+observatory archives, the data centres themselves, and so on.
+
+In these cases, it is desirable to have an independent bibliographic
+record.  Since we do not want to establish ivoids as permanent
+identifiers, VO publishers need to obtain a DOI for a resource if they
+want to be eligible for inclusion into bibliographic services.
+
+The then\dots~well, what then?  Perhaps a PleasePublishMe relationship
+to a bespoke record?  A date with a bespoke role?
 
 \appendix
 \section{Changes from Previous Versions}

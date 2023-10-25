@@ -1,5 +1,6 @@
-This document describes/defines FILL-THIS-OUT in the [Virtual
-Observatory](https://ivoa.net)
+This document describes the relation between the [Virtual
+Observatory](https://ivoa.net) and bibliographic services like the
+ADS.
 
 Stable versions of this document are available through the [IVOA
 document repository](http://ivoa.net/documents/).
