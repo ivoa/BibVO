@@ -1,6 +1,23 @@
 \documentclass[11pt,a4paper]{ivoa}
 \input tthdefs
 
+\definecolor{termcolor}{rgb}{0.6,0.1,0.1}
+
+\iftth
+\def\vocterm#1{\emph{\color{termcolor}#1}}
+
+\else
+\def\vocterm{\startvocterm\realvocterm}
+\def\realvocterm#1{\emph{\color{termcolor}#1}\endvocterm}
+\begingroup
+\gdef\breakablecolon{:\hskip0pt}
+\catcode`\:=\active
+\gdef\startvocterm{\begingroup
+  \catcode`\:=\active\let:=\breakablecolon}
+\gdef\endvocterm{\endgroup}
+\endgroup
+\fi
+
 \lstloadlanguages{sh,SQL}
 \lstset{flexiblecolumns=true,basicstyle=\ttfamily,showstringspaces=False}
 
@@ -150,6 +167,14 @@ Optionally, a key \emph{bib-format} can be given.  If it is missing,
 harvesters may assume bibcodes in bib-ref.  Otherwise, it should contain
 one of the values defined for \vorent{source/@format} in VOResource.
 
+Optionally, a key \emph{anchor-text} can be given.  This contains a
+descriptive, short text that the bibliographic service should use as
+the anchor text of the link element.
+
+Optionally, a key \emph{cardinality} can be given.  This is when the
+data centre does not actually report individual links but rather a link
+to a centre-side page keeping per-publication links.
+
 All other keys are reserved except those beginning with an underscore
 character.  These can be used to prototype extensions or -- not
 encouraged -- to communicate extra metadata between specific data
@@ -163,7 +188,20 @@ TODO: examples
 
 \subsection{Relationship Types}
 
-TODO
+The \emph{relationship} field should be an identifier from the IVOA
+relationship\_type\footnote{\url{http://ivoa.net/rdf/relationship_type}}.
+Typical identifiers data centres would use are
+
+\begin{itemize}
+\item \vocterm{Cites} is used when \emph{bib-ref} derives results from
+\emph{dataset-ref}.
+\item \vocterm{IsSupplementedBy} is used when data derived in
+\emph{bib-ref} is published in \emph{dataset-ref}.
+\end{itemize}
+
+As a guide line, the link record can be interpreted as an RDF triple
+(\emph{bib-ref}, \emph{relationship}, \emph{dataset-ref}).
+
 
 \subsection{Discovering biblink-harvest endpoints}
 
@@ -183,7 +221,7 @@ where
   standard_id like 'ivo://ivoa.net/std/BibVO#biblink-harvest-0.%'
 \end{lstlisting}
 
-\section{VO Resources as Bibliographic Resources}
+\section{Making VO Resources Citable}
 
 While we believe that in the case of VO resources simply supplementing a
 published article, a separate bibliographical record is generally not
