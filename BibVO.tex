@@ -4,11 +4,11 @@
 \definecolor{termcolor}{rgb}{0.6,0.1,0.1}
 
 \iftth
-\def\vocterm#1{\emph{\color{termcolor}#1}}
+\def\vocterm#1{\textit{\color{termcolor}#1}}
 
 \else
 \def\vocterm{\startvocterm\realvocterm}
-\def\realvocterm#1{\emph{\color{termcolor}#1}\endvocterm}
+\def\realvocterm#1{\textit{\color{termcolor}#1}\endvocterm}
 \begingroup
 \gdef\breakablecolon{:\hskip0pt}
 \catcode`\:=\active
@@ -60,7 +60,8 @@ collaboration of separately funded projects to develop standards and
 infrastructure that enable VO applications.
 
 Items written \vorent{like this} in the following refer to items from
-the VOResource data model.
+the VOResource data model \citet{2018ivoa.spec.0625P} and its
+extensions.
 
 \section{Introduction}
 
@@ -83,6 +84,27 @@ argue that resources published as a supplement to a scholarly
 publication need a different treatment here from resources not directly
 derived from one.
 \end{itemize}
+
+\subsection{Using IVOA Identifiers}
+\label{sect:use-ivoid}
+
+Several of the mechanisms described here use or yield IVOA Identifiers
+\citep{2016ivoa.spec.0523D}, hereafter ivoids.  Technically, these are
+URIs with a scheme of \textit{ivo} resolvable in the VO Registry.
+
+For general bibliographic services, these URIs will probably not be
+immediately useful, as non-VO software generally cannot resolve them.
+You can use OAI-PMH endpoints associated with the full registries listed
+on the IVOA's Registry of
+Registries\footnote{\url{https://rofr.ivoa.net}} to obtain VOResource
+metadata and then perhaps translate that to DataCite metadata using XSLT
+stylesheets as shown in \url{https://github.com/ivoa/vor-doi}.
+
+Several custom services provide simplified shortcuts to this procedure.
+For instance, prepending \verb|https://dc.g-vo.org/I| to an ivoid will
+return VOResource metadata, prepending \verb|https://dc.g-vo.org/LP|
+will yield an HTML-formatted landing page with basic metadata and access
+options generated from the VOResource.
 
 \section{Linking VO Resources to Articles}
 
@@ -131,12 +153,16 @@ easily consumable CSV form:
 
 \lstinputlisting[language=sh]{harvest.sh}
 
+See sect.~\ref{sect:use-ivoid} for how to deal with the ivoids this
+returns in a non-VO context.
+
+
 \section{Linking Datasets To Articles}
 
 The second scenario is that resources within a data centre are used or
 originate in some publication and the data centre operators want to
 notify bibliographic services of that fact.  Again, this might yield the
-equivalent of ADS ``D links''.  A prototype example here is an SSAP
+equivalent of ADS ``D links''.  An example here is an SSAP
 \citep{2012ivoa.spec.0210T} service that has a non-constant
 \textsl{meta.bib.bibcode} column.
 
@@ -147,33 +173,43 @@ harvesting, and it would certainly be unattractive for bibliographic
 services to have to harvest dozens or hundreds of VO services with
 something like weekly cadence.
 
+A second scenario when linking datasets to articles is observatory
+bibliographies, i.e., metadata collection tracking the use of certain
+data products in the literature.  So far, no VO standard exists for
+formatting and exchanging this kind of metadata.
+
+
 \subsection{The biblink-harvest endpoint}
 
 Therefore, we propose a new endpoint; a data centre could have one or a
-few of these for all its data holdings.  This endpoint is a GET-able
-resource returning a application/json-encoded sequence of link records.
-Each link record MUST have the following keys:
+few of these for its entire data holdings.  This endpoint is a GET-able
+resource returning a \textit{application/json}-encoded sequence of link
+records.  Each link record MUST have the following keys:
 
 \begin{itemize}
-\item \emph{bib-ref} -- a machine-readable identifier of a bibliographic
+\item \textit{bib-ref} -- a machine-readable identifier of a bibliographic
 source; currently, either a bibcode or a DOI.
-\item \emph{relationship} -- a relationship identifier; see below.
-\item \emph{dataset-ref} -- a reference to the dataset or VO resource cited.
+\item \textit{relationship} -- a relationship identifier; see below.
+\item \textit{dataset-ref} -- a reference to the dataset or VO resource cited.
 This SHOULD be a URI understood by common web browsers; what is referenced
 does not need to be renderable by them (e.g., it could be a FITS file).
+See sect.~\ref{sect:use-ivoid} for options providers have to reference
+VO resources here.
 \end{itemize}
 
-Optionally, a key \emph{bib-format} can be given.  If it is missing,
-harvesters may assume bibcodes in bib-ref.  Otherwise, it should contain
-one of the values defined for \vorent{source/@format} in VOResource.
+Optionally, a key \textit{bib-format} can be given.  If it is missing,
+harvesters may assume bibcodes in \textit{bib-ref}.  Otherwise, it should
+contain one of the values defined for \vorent{source/@format} in
+VOResource.
 
-Optionally, a key \emph{anchor-text} can be given.  This contains a
+Optionally, a key \textit{anchor-text} can be given.  This contains a
 descriptive, short text that the bibliographic service should use as
 the anchor text of the link element.
 
-Optionally, a key \emph{cardinality} can be given.  This is when the
+Optionally, a key \textit{cardinality} can be given.  This is when the
 data centre does not actually report individual links but rather a link
-to a centre-side page keeping per-publication links.
+to a centre-side page keeping per-publication links.  The cardinality
+then gives the (approximate) number of links on the page pointed to.
 
 All other keys are reserved except those beginning with an underscore
 character.  These can be used to prototype extensions or -- not
@@ -184,23 +220,33 @@ Since we expect responses from such endpoints to be always of manageable
 size –– a few megabytes --, we do not define a harvesting mode for this
 type of endpoint for now.
 
-TODO: examples
+Here is a possible response from a biblinks endpoint:
+
+\begin{lstlisting}[basicstyle=\footnotesize]
+[{'bib-ref': '2020A&A...637A...4R',
+  'dataset-ref': 'https://dc.g-vo.org/LP/org.gavo.dc/toss/q/line_tap',
+  'relationship': 'IsSupplementedBy'},
+ {'bib-ref': '2012A&A...546A..55R',
+  'dataset-ref': 'https://dc.g-vo.org/LP/org.gavo.dc/toss/q/line_tap',
+  'relationship': 'IsSupplementedBy'}]
+\end{lstlisting}
+
 
 \subsection{Relationship Types}
 
-The \emph{relationship} field should be an identifier from the IVOA
+The \textit{relationship} field should be an identifier from the IVOA
 relationship\_type\footnote{\url{http://ivoa.net/rdf/relationship_type}}
 vocabulary.  Typical terms data centres would use are
 
 \begin{itemize}
-\item \vocterm{Cites} is used when \emph{bib-ref} derives results from
-\emph{dataset-ref}.
+\item \vocterm{Cites} is used when \textit{bib-ref} derives results from
+\textit{dataset-ref}.
 \item \vocterm{IsSupplementedBy} is used when data derived in
-\emph{bib-ref} is published in \emph{dataset-ref}.
+\textit{bib-ref} is published in \textit{dataset-ref}.
 \end{itemize}
 
 As a guideline, the link record can be interpreted as an RDF triple
-(\emph{bib-ref}, \emph{relationship}, \emph{dataset-ref}).
+(\textit{bib-ref}, \textit{relationship}, \textit{dataset-ref}).
 
 
 \subsection{Discovering biblink-harvest endpoints}
@@ -213,7 +259,7 @@ $$\hbox{\nolinkurl{ivo://ivoa.net/std/vibvo#biblink-harvest-0.1}}.$$
 To discover the endpoints of such services, bibliography services would
 execute a RegTAP query like
 
-\begin{lstlisting}[language=SQL]
+\begin{lstlisting}[language=SQL,basicstyle=\footnotesize\ttfamily]
 select ivoid, access_url
 from rr.capability
   natural join rr.interface
@@ -225,8 +271,8 @@ where
 
 While we believe that in the case of VO resources simply supplementing a
 published article, a separate bibliographical record is generally not
-very useful -- scientists can discover the \emph{data} in the VO
-Registry, and for credit it is still more useful if they cite the
+very useful -- scientists can \emph{discover} the data in the VO
+Registry, and for emph{credit} it is still more useful if they cite the
 supplemented journal publication --, there are numerous VO resources
 that do not have an (adequate) citable article; these include resources
 publishing data from multiple independent journal publications,
