@@ -75,8 +75,8 @@ interest; they should also be directed to a VO resource that supplements
 that publication.
 
 \item A user of a bibliographic service has discovered a publication
-that has used VO datasets; they should be notified of the public
-availability of these datasets.
+that has used VO datasets; they should be notified of the availability
+of these datasets in standards-compliant data services.
 
 \item A user of a VO resource wants to properly give credit; we
 argue that resources published as a supplement to a scholarly
@@ -189,8 +189,8 @@ TODO: examples
 \subsection{Relationship Types}
 
 The \emph{relationship} field should be an identifier from the IVOA
-relationship\_type\footnote{\url{http://ivoa.net/rdf/relationship_type}}.
-Typical identifiers data centres would use are
+relationship\_type\footnote{\url{http://ivoa.net/rdf/relationship_type}}
+vocabulary.  Typical terms data centres would use are
 
 \begin{itemize}
 \item \vocterm{Cites} is used when \emph{bib-ref} derives results from
@@ -199,7 +199,7 @@ Typical identifiers data centres would use are
 \emph{bib-ref} is published in \emph{dataset-ref}.
 \end{itemize}
 
-As a guide line, the link record can be interpreted as an RDF triple
+As a guideline, the link record can be interpreted as an RDF triple
 (\emph{bib-ref}, \emph{relationship}, \emph{dataset-ref}).
 
 
@@ -209,7 +209,7 @@ Data centres register their biblink-harvest endpoints as VODataService
 \citep{2021ivoa.spec.1102D} DataService-s.  These must have a capability
 with a \verb|standardID| of (for now; this will probably change if this
 endpoint will be specified in an IVOA REC)
-$$\hbox{\nolinkurl{ivo://ivoa.net/std/BibVO#biblink-harvest-0.1}}.$$
+$$\hbox{\nolinkurl{ivo://ivoa.net/std/vibvo#biblink-harvest-0.1}}.$$
 To discover the endpoints of such services, bibliography services would
 execute a RegTAP query like
 
@@ -218,7 +218,7 @@ select ivoid, access_url
 from rr.capability
   natural join rr.interface
 where
-  standard_id like 'ivo://ivoa.net/std/BibVO#biblink-harvest-0.%'
+  standard_id like 'ivo://ivoa.net/std/bibvo#biblink-harvest-0.%'
 \end{lstlisting}
 
 \section{Making VO Resources Citable}
