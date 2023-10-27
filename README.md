@@ -1,3 +1,5 @@
+[![PDF-Preview](https://img.shields.io/badge/Preview-PDF-blue)](../../releases/download/auto-pdf-preview/BibVO-draft.pdf)
+
 This document describes the relation between the [Virtual
 Observatory](https://ivoa.net) and bibliographic services like the
 ADS.
