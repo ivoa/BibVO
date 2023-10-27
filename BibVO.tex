@@ -106,6 +106,26 @@ return VOResource metadata, prepending \verb|https://dc.g-vo.org/LP|
 will yield an HTML-formatted landing page with basic metadata and access
 options generated from the VOResource.
 
+\subsection{Running RegTAP Queries Without VO Tooling}
+\label{sect:regtap}
+
+Below, we give several ADQL queries that are intended to be executed
+against RegTAP services.  While it is preferable to run these queries
+through full-fledged TAP \citep{2019ivoa.spec.0927D} clients such as
+pyVO \citep{2014ascl.soft02004G} or stilts \citep2006ASPC..351..666T{},
+in particular non-VO actors like bibliographic services can avoid extra
+dependencies by operating these services through plain HTTP tools.
+
+Using the reg.g-vo.org RegTAP endpoint\footnote{A full list
+of full searchable VO registries can be obtained from the Registry of
+Registries at \url{https://rofr.ivoa.net}; the script should work with
+any of these endpoints.} as an example, a shell script to run the query
+from sect.~\ref{sect:res-art} could be:
+
+\lstinputlisting[language=sh]{harvest.sh}
+
+This results in easily consumable (if metadata-poor) CSV data.
+
 \section{Linking VO Resources to Articles}
 
 The VOResource metadata schema \citep{2018ivoa.spec.0625P} contains the
@@ -141,23 +161,18 @@ from rr.resource
 where source_format in ('doi', 'bibcode')
 \end{lstlisting}
 
-This query will work on any modern searchable registry\footnote{A list
-of searchable VO registries can be obtained from the Registry of
-Registries at \url{https://rofr.ivoa.net}.}.  Note, however, that
-default match limits of the TAP services may already truncate this
-response, so TAP clients should take care to pass a suitable large
-MAXREC.
-
-Without VO tooling, a script like the following will yield this data in
-easily consumable CSV form:
-
-\lstinputlisting[language=sh]{harvest.sh}
+See sect.~\ref{sect:regtap} for hints on how and where to run this
+query.
+Note that default match limits of the TAP services may already
+truncate this response, so TAP clients should take care to pass a
+suitable large MAXREC.
 
 See sect.~\ref{sect:use-ivoid} for how to deal with the ivoids this
 returns in a non-VO context.
 
 
 \section{Linking Datasets To Articles}
+\label{sect:res-art}
 
 The second scenario is that resources within a data centre are used or
 originate in some publication and the data centre operators want to
@@ -255,7 +270,7 @@ Data centres register their biblink-harvest endpoints as VODataService
 \citep{2021ivoa.spec.1102D} DataService-s.  These must have a capability
 with a \verb|standardID| of (for now; this will probably change if this
 endpoint will be specified in an IVOA REC)
-$$\hbox{\nolinkurl{ivo://ivoa.net/std/vibvo#biblink-harvest-0.1}}.$$
+$$\hbox{\nolinkurl{ivo://ivoa.net/std/bibvo#biblink-harvest-0.1}}.$$
 To discover the endpoints of such services, bibliography services would
 execute a RegTAP query like
 
@@ -267,24 +282,68 @@ where
   standard_id like 'ivo://ivoa.net/std/bibvo#biblink-harvest-0.%'
 \end{lstlisting}
 
+See sect.~\ref{sect:regtap} for hints on how and where to run this
+query.
+
 \section{Making VO Resources Citable}
 
 While we believe that in the case of VO resources simply supplementing a
-published article, a separate bibliographical record is generally not
-very useful -- scientists can \emph{discover} the data in the VO
-Registry, and for emph{credit} it is still more useful if they cite the
-supplemented journal publication --, there are numerous VO resources
-that do not have an (adequate) citable article; these include resources
-publishing data from multiple independent journal publications,
-observatory archives, the data centres themselves, and so on.
+published article, an extra metadata record for the VO resource in
+external metadata services is generally not very useful -- scientists
+can \emph{discover} the data in the VO Registry, and for \emph{credit} it
+is still more useful if they cite the supplemented journal publication
+--, there are numerous VO resources that do not have an (adequate)
+citable article; these include resources publishing data from multiple
+independent journal publications, observatory archives, infrastructure
+services of the data centres, and so on.
 
-In these cases, it is desirable to have an independent bibliographic
-record.  Since we do not want to establish ivoids as permanent
-identifiers, VO publishers need to obtain a DOI for a resource if they
-want to be eligible for inclusion into bibliographic services.
+In these cases, it is desirable to export metadata records to
+VO-external services.  Since we do not want to establish ivoids as
+permanent identifiers interpretable outside of the VO, VO publishers
+need to obtain DOIs for resources they want to be eligible for
+inclusion into external metadata directories\footnote{If they have no
+other means of obtaining a DOI so, they can use GAVO's VOiDOI service at
+\url{https://dc.g-vo.org/voidoi/q/ui/custom}}.
 
-The then\dots~well, what then?  Perhaps a PleasePublishMe relationship
-to a bespoke record?  A date with a bespoke role?
+For records that have a DOI, VO publishers then create a date element
+with a role of \vocterm{exported} in their record's \vorent{curation}
+element, somewhat like this:
+
+\begin{lstlisting}[language=XML]
+<curation>
+  [...]
+  <date role="exported">2023-10-27</date>
+</curation>
+\end{lstlisting}
+
+To make incremental harvests a bit less shaky, publishers should use a
+date about two days in the future here.
+
+External metadata directories can obtain the ivoids and DOIs of all
+records marked in this way with a RegTAP query
+(cf.~sect.~\ref{sect:regtap}) like
+
+\begin{lstlisting}
+select
+  ivoid, alt_identifier, date_value
+from
+  rr.res_date
+  natural join rr.alt_identifier
+where
+  value_role='exported'
+  and alt_identifier like 'doi:%'
+\end{lstlisting}
+
+It would be conceivable to incrementally harvest the VO Registry for
+such records by memorising the last date such a query was run and then
+adding a constraint \verb|date_value<'<iso-of-last-date>'|.  However,
+because of harvesting delays, the date given in the Registry is not
+necessarily the date the \vocterm{exported} date became visible
+in any given searchable registry.  Harvesters should account for a day
+or two of delay and plan for regular full re-harvests.
+
+See sect.~\ref{sect:use-ivoid} for information how to obtain full
+metadata records for resources discovered in this way.
 
 \appendix
 \section{Changes from Previous Versions}
