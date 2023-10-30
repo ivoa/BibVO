@@ -59,9 +59,13 @@ Virtual Observatory Alliance (IVOA)} is a global
 collaboration of separately funded projects to develop standards and
 infrastructure that enable VO applications.
 
-Items written \vorent{like this} in the following refer to items from
+Items written \vorent{like this} in the following refer to elements from
 the VOResource data model \citet{2018ivoa.spec.0625P} and its
 extensions.
+
+Items written \vocterm{like this} in the following refer to terms in
+IVOA vocabularies, which can be inspected below
+\url{https://ivoa.net/rdf}.
 
 \section{Introduction}
 
@@ -112,7 +116,7 @@ options generated from the VOResource.
 Below, we give several ADQL queries that are intended to be executed
 against RegTAP services.  While it is preferable to run these queries
 through full-fledged TAP \citep{2019ivoa.spec.0927D} clients such as
-pyVO \citep{2014ascl.soft02004G} or stilts \citep2006ASPC..351..666T{},
+pyVO \citep{2014ascl.soft02004G} or stilts \citep{2006ASPC..351..666T},
 in particular non-VO actors like bibliographic services can avoid extra
 dependencies by operating these services through plain HTTP tools.
 
@@ -206,10 +210,11 @@ records.  Each link record MUST have the following keys:
 source; currently, either a bibcode or a DOI.
 \item \textit{relationship} -- a relationship identifier; see below.
 \item \textit{dataset-ref} -- a reference to the dataset or VO resource cited.
-This SHOULD be a URI understood by common web browsers; what is referenced
-does not need to be renderable by them (e.g., it could be a FITS file).
-See sect.~\ref{sect:use-ivoid} for options providers have to reference
-VO resources here.
+This SHOULD be a URI understood by common web browsers.  See
+sect.~\ref{sect:use-ivoid} for options providers have to reference VO
+resources here.  Avoid linking directly to the dataset itself.  If at
+all possible, link to a landing page-type rendering of dataset metadata
+in biblinks.
 \end{itemize}
 
 Optionally, a key \textit{bib-format} can be given.  If it is missing,
@@ -343,7 +348,9 @@ in any given searchable registry.  Harvesters should account for a day
 or two of delay and plan for regular full re-harvests.
 
 See sect.~\ref{sect:use-ivoid} for information how to obtain full
-metadata records for resources discovered in this way.
+metadata records for resources discovered in this way.  Alternatively,
+use the DOI to retrieve the associated Datacite metadata from
+\url{https://api.datacite.org/}.
 
 \appendix
 \section{Changes from Previous Versions}
