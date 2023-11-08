@@ -311,13 +311,13 @@ other means of obtaining a DOI so, they can use GAVO's VOiDOI service at
 \url{https://dc.g-vo.org/voidoi/q/ui/custom}}.
 
 For records that have a DOI, VO publishers then create a date element
-with a role of \vocterm{exported} in their record's \vorent{curation}
+with a role of \vocterm{ExportRequested} in their record's \vorent{curation}
 element, somewhat like this:
 
 \begin{lstlisting}[language=XML]
 <curation>
   [...]
-  <date role="exported">2023-10-27</date>
+  <date role="ExportRequested">2023-10-27</date>
 </curation>
 \end{lstlisting}
 
@@ -335,7 +335,7 @@ from
   rr.res_date
   natural join rr.alt_identifier
 where
-  value_role='exported'
+  value_role='ExportRequested'
   and alt_identifier like 'doi:%'
 \end{lstlisting}
 
@@ -343,7 +343,7 @@ It would be conceivable to incrementally harvest the VO Registry for
 such records by memorising the last date such a query was run and then
 adding a constraint \verb|date_value<'<iso-of-last-date>'|.  However,
 because of harvesting delays, the date given in the Registry is not
-necessarily the date the \vocterm{exported} date became visible
+necessarily the date the \vocterm{ExportRequested} date became visible
 in any given searchable registry.  Harvesters should account for a day
 or two of delay and plan for regular full re-harvests.
 
