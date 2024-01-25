@@ -38,9 +38,9 @@
 
 \begin{document}
 \begin{abstract}
-This note documents existing approaches to interfacing the Virtual
+This note documents explains existing approaches to interfacing the Virtual
 Observatory to bibliographic services, in particular the Astrophysics
-Data Service ADS, and suggests amendments to these existing practices
+Data Service ADS, and suggests amendments to these practices
 where necessary.
 \end{abstract}
 
@@ -98,16 +98,19 @@ URIs with a scheme of \textit{ivo} resolvable in the VO Registry.
 
 For general bibliographic services, these URIs will probably not be
 immediately useful, as non-VO software generally cannot resolve them.
-You can use OAI-PMH endpoints associated with the full registries listed
+One could in principle use OAI-PMH endpoints
+associated with the full registries listed
 on the IVOA's Registry of
 Registries\footnote{\url{https://rofr.ivoa.net}} to obtain VOResource
 metadata and then perhaps translate that to DataCite metadata using XSLT
 stylesheets as shown in \url{https://github.com/ivoa/vor-doi}.
 
-Several custom services provide simplified shortcuts to this procedure.
+However, is is much easier to resolve ivoids using one of
+several custom services that provide simplified shortcuts.
 For instance, prepending \verb|https://dc.g-vo.org/I| to an ivoid will
-return VOResource metadata, prepending \verb|https://dc.g-vo.org/LP|
-will yield an HTML-formatted landing page with basic metadata and access
+return XML-serialised VOResource metadata.
+Prepending \verb|https://dc.g-vo.org/LP|
+will yield an HTML-for\-matted landing page with basic metadata and access
 options generated from the VOResource.
 
 \subsection{Running RegTAP Queries Without VO Tooling}
@@ -181,7 +184,7 @@ returns in a non-VO context.
 The second scenario is that resources within a data centre are used or
 originate in some publication and the data centre operators want to
 notify bibliographic services of that fact.  Again, this might yield the
-equivalent of ADS ``D links''.  An example here is an SSAP
+equivalent of ADS ``D links''.  An example for this would be an SSAP
 \citep{2012ivoa.spec.0210T} service that has a non-constant
 \textsl{meta.bib.bibcode} column.
 
@@ -273,9 +276,8 @@ As a guideline, the link record can be interpreted as an RDF triple
 
 Data centres register their biblink-harvest endpoints as VODataService
 \citep{2021ivoa.spec.1102D} DataService-s.  These must have a capability
-with a \verb|standardID| of (for now; this will probably change if this
-endpoint will be specified in an IVOA REC)
-$$\hbox{\nolinkurl{ivo://ivoa.net/std/bibvo#biblink-harvest-0.1}}.$$
+with a \verb|standardID| of
+$$\hbox{\nolinkurl{ivo://ivoa.net/std/bibvo#biblink-harvest-1.0}}.$$
 To discover the endpoints of such services, bibliography services would
 execute a RegTAP query like
 
@@ -284,7 +286,7 @@ select ivoid, access_url
 from rr.capability
   natural join rr.interface
 where
-  standard_id like 'ivo://ivoa.net/std/bibvo#biblink-harvest-0.%'
+  standard_id like 'ivo://ivoa.net/std/bibvo#biblink-harvest-1.%'
 \end{lstlisting}
 
 See sect.~\ref{sect:regtap} for hints on how and where to run this
