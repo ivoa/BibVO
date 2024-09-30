@@ -33,12 +33,13 @@
 \editor{Demleitner, M.}
 
 % \previousversion[????URL????]{????Concise Document Label????}
+\previousversion[https://ivoa.net/documents/Notes/BibVO/20240214]{Version 1.0}
 \previousversion{This is the first public release}
 
 
 \begin{document}
 \begin{abstract}
-This note documents explains existing approaches to interfacing the Virtual
+This note documents existing approaches to interfacing the Virtual
 Observatory to bibliographic services, in particular the Astrophysics
 Data Service ADS, and suggests amendments to these practices
 where necessary.
@@ -337,7 +338,7 @@ from
   rr.res_date
   natural join rr.alt_identifier
 where
-  value_role='ExportRequested'
+  value_role='exportrequested'
   and alt_identifier like 'doi:%'
 \end{lstlisting}
 
@@ -356,6 +357,9 @@ use the DOI to retrieve the associated Datacite metadata from
 
 \appendix
 \section{Changes from Previous Versions}
+
+%\subsection{Changes from Version 1.0}
+
 
 No previous versions yet.
 % these would be subsections "Changes from v. WD-..."

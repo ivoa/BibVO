@@ -5,10 +5,10 @@
 DOCNAME = BibVO
 
 # count up; you probably do not want to bother with versions <1.0
-DOCVERSION = 1.0
+DOCVERSION = 1.1
 
 # Publication date, ISO format; update manually for "releases"
-DOCDATE = 2024-01-15
+DOCDATE = 2024-09-30
 
 # What is it you're writing: NOTE, WD, PR, REC, PEN, or EN
 DOCTYPE = NOTE
@@ -31,6 +31,8 @@ VECTORFIGURES =
 
 # Additional files to distribute (e.g., CSS, schema files, examples...)
 AUX_FILES =
+
+DOCREPO_BASEURL = https://ivoa.net/documents/Notes/BibVO
 
 -include ivoatex/Makefile
 
